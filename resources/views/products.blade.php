@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Laravel Ajax CRUD Tutorial Example - ItSolutionStuff.com</title>
+    <title>Laravel 11 Ajax CRUD Tutorial Example - ItSolutionStuff.com</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.11.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
@@ -47,17 +47,23 @@
             <div class="modal-body">
                 <form id="productForm" name="productForm" class="form-horizontal">
                    <input type="hidden" name="product_id" id="product_id">
+                   @csrf
+
+                    <div class="alert alert-danger print-error-msg" style="display:none">
+                        <ul></ul>
+                    </div>
+
                     <div class="form-group">
                         <label for="name" class="col-sm-2 control-label">Name:</label>
                         <div class="col-sm-12">
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Enter Name" value="" maxlength="50" required="">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Enter Name" value="" maxlength="50">
                         </div>
                     </div>
        
                     <div class="form-group">
                         <label class="col-sm-2 control-label">Details:</label>
                         <div class="col-sm-12">
-                            <textarea id="detail" name="detail" required="" placeholder="Enter Details" class="form-control"></textarea>
+                            <textarea id="detail" name="detail" placeholder="Enter Details" class="form-control"></textarea>
                         </div>
                     </div>
         
@@ -89,7 +95,7 @@
       
 <script type="text/javascript">
   $(function () {
-      
+
     /*------------------------------------------
      --------------------------------------------
      Pass Header Token
@@ -167,27 +173,34 @@
     Create Product Code
     --------------------------------------------
     --------------------------------------------*/
-    $('#saveBtn').click(function (e) {
+    $('#productForm').submit(function(e) {
         e.preventDefault();
-        $(this).html('Sending..');
-      
+ 
+        let formData = new FormData(this);
+        $('#saveBtn').html('Sending...');
+  
         $.ajax({
-          data: $('#productForm').serialize(),
-          url: "{{ route('products.store') }}",
-          type: "POST",
-          dataType: 'json',
-          success: function (data) {
-       
-              $('#productForm').trigger("reset");
-              $('#ajaxModel').modal('hide');
-              table.draw();
-           
-          },
-          error: function (data) {
-              console.log('Error:', data);
-              $('#saveBtn').html('Save Changes');
-          }
-      });
+                type:'POST',
+                url: "{{ route('products.store') }}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: (response) => {
+                      $('#saveBtn').html('Submit');
+                      $('#productForm').trigger("reset");
+                      $('#ajaxModel').modal('hide');
+                      table.draw();
+                },
+                error: function(response){
+                    $('#saveBtn').html('Submit');
+                    $('#productForm').find(".print-error-msg").find("ul").html('');
+                    $('#productForm').find(".print-error-msg").css('display','block');
+                    $.each( response.responseJSON.errors, function( key, value ) {
+                        $('#productForm').find(".print-error-msg").find("ul").append('<li>'+value+'</li>');
+                    });
+                }
+           });
+      
     });
       
     /*------------------------------------------
@@ -198,7 +211,7 @@
     $('body').on('click', '.deleteProduct', function () {
      
         var product_id = $(this).data("id");
-        confirm("Are You sure want to delete !");
+        confirm("Are You sure want to delete?");
         
         $.ajax({
             type: "DELETE",

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use DataTables;
+use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
@@ -44,8 +45,13 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
+        $request->validate([
+            'name' => 'required',
+            'detail' => 'required',
+        ]);
+        
         Product::updateOrCreate([
                     'id' => $request->product_id
                 ],
@@ -63,7 +69,7 @@ class ProductController extends Controller
      * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
         $product = Product::find($id);
         return response()->json($product);
@@ -75,7 +81,7 @@ class ProductController extends Controller
      * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id): JsonResponse
     {
         $product = Product::find($id);
         return response()->json($product);
@@ -87,7 +93,7 @@ class ProductController extends Controller
      * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         Product::find($id)->delete();
       
